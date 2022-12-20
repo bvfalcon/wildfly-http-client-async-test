@@ -5,7 +5,7 @@ Java 11 and Maven 3.6.3 are required.
 
 Build and run from source with command: `mvn`
 
-Error Description:
+### Error
 
 After aplication started we have an error
 
@@ -65,3 +65,11 @@ After aplication started we have an error
 ```
 
 </details>
+
+## Error description
+
+In EJB-Component we make [**asynchronous** http-call](https://github.com/bvfalcon/wildfly-http-client-async-test/blob/master/src/main/java/name/bychkov/test/Checker.java#L68) using ManagedScheduledExecutorService as executor for HttpClient. Then we [process results asynchronously](https://github.com/bvfalcon/wildfly-http-client-async-test/blob/master/src/main/java/name/bychkov/test/Checker.java#L43) using [the same ManagedScheduledExecutorService](https://github.com/bvfalcon/wildfly-http-client-async-test/blob/master/src/main/java/name/bychkov/test/Checker.java#L53) too. While processing we have this error.
+
+In case of [**synchronous** http-call](https://github.com/bvfalcon/wildfly-http-client-async-test/blob/sync-call/src/main/java/name/bychkov/test/Checker.java#L71) this error has not aqcuired.
+
+For this reason we can assume the reason of error in http-call **asynchronity**.
