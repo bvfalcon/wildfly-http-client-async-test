@@ -1,5 +1,6 @@
 package name.bychkov.test;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -40,8 +41,9 @@ public class Checker {
 		CompletableFuture<Void>[] futures = new CompletableFuture[serverUrls.size()];
 		for (int i = 0; i < serverUrls.size(); i++) {
 			URI url = serverUrls.get(i);
-			futures[i] = call(url).thenApplyAsync(response -> {
+			futures[i] = CompletableFuture.runAsync(() -> {
 				try {
+					HttpResponse<String> response = call(url);
 					String json = response.body();
 					System.out.println("raw json: " + json);
 					List<SimpleDto> parsed = parse(json);
@@ -49,7 +51,6 @@ public class Checker {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-				return null;
 			}, scheduler);
 		}
 		CompletableFuture.allOf(futures).join();
@@ -64,9 +65,9 @@ public class Checker {
 		}
 	}
 
-	private CompletableFuture<HttpResponse<String>> call(URI uri) {
+	private HttpResponse<String> call(URI uri) throws IOException, InterruptedException {
 		HttpClient client = HttpClient.newBuilder().executor(scheduler).build();
 		HttpRequest request = HttpRequest.newBuilder().uri(uri).build();
-		return client.sendAsync(request, BodyHandlers.ofString());
+		return client.send(request, BodyHandlers.ofString());
 	}
 }
